@@ -1,0 +1,9 @@
+name: dart_orm_adapter_mysql
+version: 0.0.1
+description: >
+  MySQL adapter for DartORM
+author: Ustimenko Sergey <ustims@gmail.com>
+homepage: http://github.com/ustims/DartORM-MySQL
+dependencies:
+  dart_orm: any
+  sqljocky: ">=0.11.0 <0.12.0"
