@@ -49,7 +49,7 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
   }
 
   Future createTable(Table table) async {
-    String sqlQueryString = SQLAdapter.constructTableSql(table);
+    String sqlQueryString = this.constructTableSql(table);
     var prepared = await connection.prepare(sqlQueryString);
     var result = null;
 
