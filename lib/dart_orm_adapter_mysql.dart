@@ -138,7 +138,8 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
     if(dbTypeName.length < 1){
       switch (field.propertyTypeName) {
         case 'DateTime':
-          dbTypeName = 'DATETIME(3)'; // 3 the milliseconds precision
+          //dbTypeName = 'DATETIME(3)'; // 3 the milliseconds precision
+          dbTypeName = 'DATETIME';
           break;
       }
     }
