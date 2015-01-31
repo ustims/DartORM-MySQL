@@ -131,4 +131,18 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
 
     return result.affectedRows;
   }
+
+  String convertDartType(Field field) {
+    String dbTypeName = super.convertDartType(field);
+
+    if(dbTypeName.length < 1){
+      switch (field.propertyTypeName) {
+        case 'DateTime':
+          dbTypeName = 'DATETIME(3)'; // 3 the milliseconds precision
+          break;
+      }
+    }
+
+    return dbTypeName;
+  }
 }
