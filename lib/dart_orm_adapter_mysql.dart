@@ -3,10 +3,12 @@ library dart_orm_adapter_mysql;
 import 'package:dart_orm/dart_orm.dart';
 import 'package:sqljocky/sqljocky.dart' as mysql_connector;
 import 'dart:async';
+import 'package:logging/logging.dart';
 
 
 class MySQLDBAdapter extends SQLAdapter with DBAdapter {
   String _connectionString;
+  final Logger log = new Logger('DartORM.MySQLDBAdapter');
 
   MySQLDBAdapter(String connectionString) {
     _connectionString = connectionString;
@@ -38,6 +40,8 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
       databaseName = uri.path.replaceAll('/', '');
     }
 
+    log.finest('Connecting to ${userName}@${uri.host}:${uri.port}/${databaseName}');
+
     this.connection = new mysql_connector.ConnectionPool(
         host: uri.host,
         port: uri.port,
@@ -50,17 +54,24 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
 
   Future createTable(Table table) async {
     String sqlQueryString = this.constructTableSql(table);
+    log.finest('Create table:');
+    log.finest(sqlQueryString);
     var prepared = await connection.prepare(sqlQueryString);
     var result = null;
 
     result = await prepared.execute();
+    log.finest('Result:');
+    log.finest(result);
     return result;
   }
 
   Future<List<Map>> select(Select select) {
     Completer completer = new Completer();
+    log.finest('Select:');
 
     String sqlQueryString = SQLAdapter.constructSelectSql(select);
+    log.finest(sqlQueryString);
+
     List<Map> results = new List<Map>();
 
     this.connection.query(sqlQueryString)
@@ -84,9 +95,12 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
       });
     })
     .then((r) {
+      log.finest('Result:');
+      log.finest(results);
       completer.complete(results);
     })
     .catchError((e) {
+      log.severe(e);
       if (e is mysql_connector.MySqlException) {
         switch (e.errorNumber) {
           case 1146:
@@ -108,10 +122,14 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
   }
 
   Future<int> insert(Insert insert) async {
+    log.finest('Insert:');
     String sqlQueryString = SQLAdapter.constructInsertSql(insert);
+    log.finest(sqlQueryString);
 
     var prepared = await connection.prepare(sqlQueryString);
     var result = await prepared.execute();
+
+    log.finest(result);
 
     if (result.insertId != null) {
       // if we have any results, here will be returned new primary key
@@ -124,10 +142,13 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
   }
 
   Future<int> update(Update update) async {
+    log.finest('Update:');
     String sqlQueryString = SQLAdapter.constructUpdateSql(update);
+    log.finest(sqlQueryString);
 
     var prepared = await connection.prepare(sqlQueryString);
     var result = await prepared.execute();
+    log.finest(result);
 
     return result.affectedRows;
   }
