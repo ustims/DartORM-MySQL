@@ -82,6 +82,8 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
       if (vInfo[0] == 'version') {
         _mysqlVersion = new Version.parse(vInfo[1]);
         log.fine('MySQL version: ' + _mysqlVersion.toString());
+        log.fine('Supported features:');
+        log.fine('FEATURE_FRACTIONAL_SECONDS: ${dbSupports(FEATURE_FRACTIONAL_SECONDS)}');
       }
       _connectionDBInfo[vInfo[0]] = vInfo[1];
     });
@@ -104,7 +106,7 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
     Completer completer = new Completer();
     log.finest('Select:');
 
-    String sqlQueryString = SQLAdapter.constructSelectSql(select);
+    String sqlQueryString = this.constructSelectSql(select);
     log.finest(sqlQueryString);
 
     List<Map> results = new List<Map>();
@@ -158,7 +160,7 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
 
   Future<int> insert(Insert insert) async {
     log.finest('Insert:');
-    String sqlQueryString = SQLAdapter.constructInsertSql(insert);
+    String sqlQueryString = this.constructInsertSql(insert);
     log.finest(sqlQueryString);
 
     var prepared = await connection.prepare(sqlQueryString);
@@ -178,7 +180,7 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
 
   Future<int> update(Update update) async {
     log.finest('Update:');
-    String sqlQueryString = SQLAdapter.constructUpdateSql(update);
+    String sqlQueryString = this.constructUpdateSql(update);
     log.finest(sqlQueryString);
 
     var prepared = await connection.prepare(sqlQueryString);
@@ -188,8 +190,12 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
     return result.affectedRows;
   }
 
-  String convertDartType(Field field) {
-    String dbTypeName = super.convertDartType(field);
+  /**
+   * This method is invoked when db table(column) is created to determine
+   * what sql type to use.
+   */
+  String getSqlType(Field field) {
+    String dbTypeName = super.getSqlType(field);
 
     if (dbTypeName.length < 1) {
       switch (field.propertyTypeName) {
@@ -205,5 +211,26 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
     }
 
     return dbTypeName;
+  }
+
+  TypedSQL getTypedSqlFromValue(var instanceFieldValue,
+                                [Table table=null]) {
+    TypedSQL value = super.getTypedSqlFromValue(instanceFieldValue, table);
+    if(value is DateTimeSQL){
+      DateTime dt = value.value;
+      if(!dbSupports(FEATURE_FRACTIONAL_SECONDS)){
+        DateTime withoutMillis = null;
+        if(dt.millisecond > 500){
+          withoutMillis = new DateTime.fromMillisecondsSinceEpoch(
+              dt.millisecondsSinceEpoch + (1000 - dt.millisecond));
+        } else {
+          withoutMillis = new DateTime.fromMillisecondsSinceEpoch(
+              dt.millisecondsSinceEpoch - dt.millisecond);
+        }
+        value = new DateTimeSQL(withoutMillis);
+      }
+    }
+
+    return value;
   }
 }

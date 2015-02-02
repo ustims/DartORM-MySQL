@@ -1,3 +1,8 @@
+0.0.7
+-----
+
+- Milliseconds rounding for MySQL < 5.6.4.
+
 0.0.6
 -----
 
