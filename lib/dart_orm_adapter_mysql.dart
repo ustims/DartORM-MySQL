@@ -1,14 +1,40 @@
 library dart_orm_adapter_mysql;
 
 import 'package:dart_orm/dart_orm.dart';
-import 'package:sqljocky/sqljocky.dart' as mysql_connector;
+
 import 'dart:async';
+import 'dart:collection';
+
+import 'package:sqljocky/sqljocky.dart' as mysql_connector;
 import 'package:logging/logging.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 
 class MySQLDBAdapter extends SQLAdapter with DBAdapter {
   String _connectionString;
   final Logger log = new Logger('DartORM.MySQLDBAdapter');
+
+  LinkedHashMap<String, String> _connectionDBInfo = new LinkedHashMap();
+  Version _mysqlVersion = null;
+
+  /**
+   * MySQL support fractional seconds(milliseconds) only from this version.
+   * http://dev.mysql.com/doc/refman/5.6/en/fractional-seconds.html
+   */
+  static final VersionConstraint FEATURE_FRACTIONAL_SECONDS =
+    new VersionConstraint.parse(">=5.6.4");
+
+  /**
+   * Checks whether currently connected database supports a feature.
+   * Features version constraints defined above as FEATURE_* properties.
+   */
+  bool dbSupports(VersionConstraint feature){
+    if (feature.allows(_mysqlVersion)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   MySQLDBAdapter(String connectionString) {
     _connectionString = connectionString;
@@ -49,7 +75,15 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
         password: password,
         db: databaseName, max: 5);
 
-    await this.connection.query('show tables');
+    var versionInfo = await this.connection.query(
+        'SHOW VARIABLES LIKE "%version%";');
+
+    versionInfo.forEach((vInfo) {
+      if (vInfo[0] == 'version') {
+        _mysqlVersion = new Version.parse(vInfo[1]);
+      }
+      _connectionDBInfo[vInfo[0]] = vInfo[1];
+    });
   }
 
   Future createTable(Table table) async {
@@ -129,7 +163,7 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
     var prepared = await connection.prepare(sqlQueryString);
     var result = await prepared.execute();
 
-    log.finest(result);
+    log.finest('Affected rows: ${result.affectedRows}, insertId: ${result.insertId}');
 
     if (result.insertId != null) {
       // if we have any results, here will be returned new primary key
@@ -156,11 +190,15 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
   String convertDartType(Field field) {
     String dbTypeName = super.convertDartType(field);
 
-    if(dbTypeName.length < 1){
+    if (dbTypeName.length < 1) {
       switch (field.propertyTypeName) {
         case 'DateTime':
-          //dbTypeName = 'DATETIME(3)'; // 3 the milliseconds precision
-          dbTypeName = 'DATETIME';
+          if (dbSupports(FEATURE_FRACTIONAL_SECONDS)) {
+            dbTypeName = 'DATETIME(3)';
+          } else {
+            dbTypeName = 'DATETIME';
+          }
+
           break;
       }
     }

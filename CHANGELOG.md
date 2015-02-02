@@ -1,3 +1,9 @@
+0.0.6
+-----
+
+- getting mysql version added with
+  pub_semver package usage for supported features ckecks.
+
 0.0.5
 -----
 
