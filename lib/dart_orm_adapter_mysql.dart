@@ -81,6 +81,7 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
     versionInfo.forEach((vInfo) {
       if (vInfo[0] == 'version') {
         _mysqlVersion = new Version.parse(vInfo[1]);
+        log.fine('MySQL version: ' + _mysqlVersion.toString());
       }
       _connectionDBInfo[vInfo[0]] = vInfo[1];
     });
