@@ -9,7 +9,6 @@ import 'package:sqljocky/sqljocky.dart' as mysql_connector;
 import 'package:logging/logging.dart';
 import 'package:pub_semver/pub_semver.dart';
 
-
 class MySQLDBAdapter extends SQLAdapter with DBAdapter {
   String _connectionString;
   final Logger log = new Logger('DartORM.MySQLDBAdapter');
@@ -22,13 +21,13 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
    * http://dev.mysql.com/doc/refman/5.6/en/fractional-seconds.html
    */
   static final VersionConstraint FEATURE_FRACTIONAL_SECONDS =
-    new VersionConstraint.parse(">=5.6.4");
+      new VersionConstraint.parse(">=5.6.4");
 
   /**
    * Checks whether currently connected database supports a feature.
    * Features version constraints defined above as FEATURE_* properties.
    */
-  bool dbSupports(VersionConstraint feature){
+  bool dbSupports(VersionConstraint feature) {
     if (feature.allows(_mysqlVersion)) {
       return true;
     } else {
@@ -66,24 +65,27 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
       databaseName = uri.path.replaceAll('/', '');
     }
 
-    log.finest('Connecting to ${userName}@${uri.host}:${uri.port}/${databaseName}');
+    log.finest(
+        'Connecting to ${userName}@${uri.host}:${uri.port}/${databaseName}');
 
     this.connection = new mysql_connector.ConnectionPool(
         host: uri.host,
         port: uri.port,
         user: userName,
         password: password,
-        db: databaseName, max: 5);
+        db: databaseName,
+        max: 5);
 
-    var versionInfo = await this.connection.query(
-        'SHOW VARIABLES LIKE "%version%";');
+    var versionInfo =
+        await this.connection.query('SHOW VARIABLES LIKE "%version%";');
 
     versionInfo.forEach((vInfo) {
       if (vInfo[0] == 'version') {
         _mysqlVersion = new Version.parse(vInfo[1]);
         log.fine('MySQL version: ' + _mysqlVersion.toString());
         log.fine('Supported features:');
-        log.fine('FEATURE_FRACTIONAL_SECONDS: ${dbSupports(FEATURE_FRACTIONAL_SECONDS)}');
+        log.fine(
+            'FEATURE_FRACTIONAL_SECONDS: ${dbSupports(FEATURE_FRACTIONAL_SECONDS)}');
       }
       _connectionDBInfo[vInfo[0]] = vInfo[1];
     });
@@ -111,8 +113,7 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
 
     List<Map> results = new List<Map>();
 
-    this.connection.query(sqlQueryString)
-    .then((rawResults) {
+    this.connection.query(sqlQueryString).then((rawResults) {
       return rawResults.forEach((rawRow) {
         Map<String, dynamic> row = new Map<String, dynamic>();
 
@@ -124,19 +125,16 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
             row[f.fieldName] = rawRow[fieldNumber];
           }
 
-          fieldNumber ++;
+          fieldNumber++;
         }
 
         results.add(row);
-
       });
-    })
-    .then((r) {
+    }).then((r) {
       log.finest('Result:');
       log.finest(results);
       completer.complete(results);
-    })
-    .catchError((e) {
+    }).catchError((e) {
       log.severe(e);
       if (e is mysql_connector.MySqlException) {
         switch (e.errorNumber) {
@@ -166,7 +164,8 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
     var prepared = await connection.prepare(sqlQueryString);
     var result = await prepared.execute();
 
-    log.finest('Affected rows: ${result.affectedRows}, insertId: ${result.insertId}');
+    log.finest(
+        'Affected rows: ${result.affectedRows}, insertId: ${result.insertId}');
 
     if (result.insertId != null) {
       // if we have any results, here will be returned new primary key
@@ -213,14 +212,13 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
     return dbTypeName;
   }
 
-  TypedSQL getTypedSqlFromValue(var instanceFieldValue,
-                                [Table table=null]) {
+  TypedSQL getTypedSqlFromValue(var instanceFieldValue, [Table table = null]) {
     TypedSQL value = super.getTypedSqlFromValue(instanceFieldValue, table);
-    if(value is DateTimeSQL){
+    if (value is DateTimeSQL) {
       DateTime dt = value.value;
-      if(!dbSupports(FEATURE_FRACTIONAL_SECONDS)){
+      if (!dbSupports(FEATURE_FRACTIONAL_SECONDS)) {
         DateTime withoutMillis = null;
-        if(dt.millisecond > 500){
+        if (dt.millisecond > 500) {
           withoutMillis = new DateTime.fromMillisecondsSinceEpoch(
               dt.millisecondsSinceEpoch + (1000 - dt.millisecond));
         } else {
