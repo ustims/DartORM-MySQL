@@ -50,7 +50,7 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
     }
 
     if (uri.port == null || uri.port == 0) {
-      uri.port = 3306;
+      uri = uri.replace(port: 3306);
     }
     if (uri.userInfo != '') {
       var userInfo = uri.userInfo.split(':');
