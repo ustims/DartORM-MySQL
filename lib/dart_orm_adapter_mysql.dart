@@ -10,7 +10,7 @@ import 'package:logging/logging.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 class MySQLDBAdapter extends SQLAdapter with DBAdapter {
-  String _connectionString;
+  final String _connectionString;
   final Logger log = new Logger('DartORM.MySQLDBAdapter');
 
   LinkedHashMap<String, String> _connectionDBInfo = new LinkedHashMap();
@@ -35,9 +35,8 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
     }
   }
 
-  MySQLDBAdapter(String connectionString) {
-    _connectionString = connectionString;
-  }
+  MySQLDBAdapter(String connectionString)
+      : this._connectionString = connectionString;
 
   Future connect() async {
     String userName = '';
