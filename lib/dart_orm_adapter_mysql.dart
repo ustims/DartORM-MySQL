@@ -13,6 +13,8 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
   final String _connectionString;
   final Logger log = new Logger('DartORM.MySQLDBAdapter');
 
+  mysql_connector.ConnectionPool get connection => super.connection;
+
   LinkedHashMap<String, String> _connectionDBInfo = new LinkedHashMap();
   Version _mysqlVersion = null;
 
