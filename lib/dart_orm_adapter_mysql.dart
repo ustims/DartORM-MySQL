@@ -10,8 +10,10 @@ import 'package:logging/logging.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 class MySQLDBAdapter extends SQLAdapter with DBAdapter {
-  final String _connectionString;
   final Logger log = new Logger('DartORM.MySQLDBAdapter');
+
+  final String host, userName, password, databaseName;
+  final int port;
 
   mysql_connector.ConnectionPool get connection => super.connection;
 
@@ -38,46 +40,60 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
     }
   }
 
-  MySQLDBAdapter(String connectionString)
-      : this._connectionString = connectionString;
-
-  Future connect() async {
-    var uri = Uri.parse(_connectionString);
+  factory MySQLDBAdapter(String connectionString) {
+    var uri = Uri.parse(connectionString);
     if (uri.scheme != 'mysql') {
-      throw new Exception(
-          'Invalid scheme in uri: $_connectionString ${uri.scheme}');
+      throw new ArgumentError.value(connectionString, 'connectionString',
+          'Invalid scheme in uri: ${uri.scheme}');
     }
 
     if (uri.port == null || uri.port == 0) {
       uri = uri.replace(port: 3306);
     }
 
-    String userName = '';
-    String password = '';
+    var userName = '';
+    var password = '';
     if (uri.userInfo != '') {
       var userInfo = uri.userInfo.split(':');
       if (userInfo.length != 2) {
-        throw new Exception('Invalid format of userInfo field: $uri.userInfo');
+        throw new ArgumentError(
+            'Invalid format of userInfo field: $uri.userInfo');
       }
       userName = userInfo[0];
       password = userInfo[1];
     }
 
     String databaseName = '';
-    
+
     if (!uri.pathSegments.isNotEmpty) {
       if (uri.pathSegments.length > 1) {
-        throw new ArgumentError('connectionString path cannot have more than one component.');
+        throw new ArgumentError.value(
+            connectionString,
+            'connectionString'
+            'connectionString path cannot have more than one component.');
       }
       databaseName = uri.pathSegments.single;
     }
 
-    log.finest(
-        'Connecting to ${userName}@${uri.host}:${uri.port}/${databaseName}');
+    return new MySQLDBAdapter.withDetails(uri.host,
+        port: uri.port,
+        userName: userName,
+        password: password,
+        databaseName: databaseName);
+  }
+
+  MySQLDBAdapter.withDetails(this.host,
+      {this.port: 3306,
+      this.databaseName: '',
+      this.password: '',
+      this.userName: ''});
+
+  Future connect() async {
+    log.finest('Connecting to ${userName}@${host}:${port}/${databaseName}');
 
     this.connection = new mysql_connector.ConnectionPool(
-        host: uri.host,
-        port: uri.port,
+        host: host,
+        port: port,
         user: userName,
         password: password,
         db: databaseName,

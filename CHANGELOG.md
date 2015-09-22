@@ -1,8 +1,13 @@
+0.1.0
+-----
+
+- Added a new constructor `MySQLDBAdapter.withDetails`.
+- Arguments to `new MySQLDBAdapter` are validated immediately.
+
 0.0.9+2
 -------
 
 - Fix async for loop bug in `MySQLDBAdapter.select`.
-
 
 0.0.9+1
 -------
