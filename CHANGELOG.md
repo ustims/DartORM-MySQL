@@ -1,3 +1,8 @@
+0.0.9+1
+-------
+
+- Fix a bug in `MySQLDBAdapter.connect`.
+
 0.0.9
 -----
 

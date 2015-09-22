@@ -80,7 +80,7 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
     var versionInfo =
         await this.connection.query('SHOW VARIABLES LIKE "%version%";');
 
-    versionInfo.forEach((vInfo) {
+    await for (var vInfo in versionInfo) {
       if (vInfo[0] == 'version') {
         _mysqlVersion = new Version.parse(vInfo[1]);
         log.fine('MySQL version: ' + _mysqlVersion.toString());
@@ -89,7 +89,7 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
             'FEATURE_FRACTIONAL_SECONDS: ${dbSupports(FEATURE_FRACTIONAL_SECONDS)}');
       }
       _connectionDBInfo[vInfo[0]] = vInfo[1];
-    });
+    }
   }
 
   Future createTable(Table table) async {
