@@ -116,7 +116,7 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
       var rawResults = await this.connection.query(sqlQueryString);
 
       List<Map> results = new List<Map>();
-      for (var rawRow in rawResults) {
+      await for (var rawRow in rawResults) {
         Map<String, dynamic> row = new Map<String, dynamic>();
 
         int fieldNumber = 0;

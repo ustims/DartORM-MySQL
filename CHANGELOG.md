@@ -1,3 +1,9 @@
+0.0.9+2
+-------
+
+- Fix async for loop bug in `MySQLDBAdapter.select`.
+
+
 0.0.9+1
 -------
 
