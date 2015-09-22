@@ -42,10 +42,6 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
       : this._connectionString = connectionString;
 
   Future connect() async {
-    String userName = '';
-    String password = '';
-    String databaseName = '';
-
     var uri = Uri.parse(_connectionString);
     if (uri.scheme != 'mysql') {
       throw new Exception(
@@ -55,6 +51,9 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
     if (uri.port == null || uri.port == 0) {
       uri = uri.replace(port: 3306);
     }
+
+    String userName = '';
+    String password = '';
     if (uri.userInfo != '') {
       var userInfo = uri.userInfo.split(':');
       if (userInfo.length != 2) {
@@ -63,8 +62,14 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
       userName = userInfo[0];
       password = userInfo[1];
     }
-    if (uri.path != '') {
-      databaseName = uri.path.replaceAll('/', '');
+
+    String databaseName = '';
+    
+    if (!uri.pathSegments.isNotEmpty) {
+      if (uri.pathSegments.length > 1) {
+        throw new ArgumentError('connectionString path cannot have more than one component.');
+      }
+      databaseName = uri.pathSegments.single;
     }
 
     log.finest(
