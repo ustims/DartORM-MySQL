@@ -1,4 +1,11 @@
-0.0.7
+0.0.9
+-----
+
+- Require at least Dart 1.9
+
+- Allow recent releases of `sqljocky`
+
+0.0.8
 -----
 
 - Milliseconds rounding for MySQL < 5.6.4.
