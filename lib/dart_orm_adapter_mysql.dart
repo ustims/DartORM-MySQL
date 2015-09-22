@@ -111,7 +111,6 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
     String sqlQueryString = this.constructSelectSql(select);
     log.finest(sqlQueryString);
 
-
     try {
       var rawResults = await this.connection.query(sqlQueryString);
 
