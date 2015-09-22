@@ -15,7 +15,8 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
 
   mysql_connector.ConnectionPool get connection => super.connection;
 
-  LinkedHashMap<String, String> _connectionDBInfo = new LinkedHashMap();
+  final LinkedHashMap<String, String> _connectionDBInfo =
+      new LinkedHashMap<String, String>();
   Version _mysqlVersion = null;
 
   /**
