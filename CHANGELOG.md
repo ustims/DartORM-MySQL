@@ -2,6 +2,7 @@
 
 - Added a new constructor `MySQLDBAdapter.withDetails`.
 - Arguments to `new MySQLDBAdapter` are validated immediately.
+- Allow `connectionString` to be a `Uri` instance.
 
 ## 0.0.9+2
 

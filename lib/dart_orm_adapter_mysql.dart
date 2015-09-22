@@ -40,8 +40,14 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
     }
   }
 
-  factory MySQLDBAdapter(String connectionString) {
-    var uri = Uri.parse(connectionString);
+  /// [connectionString] can be either a `Uri` or `String`.
+  factory MySQLDBAdapter(connectionString) {
+    if (connectionString is String) {
+      connectionString = Uri.parse(connectionString);
+    }
+
+    var uri = connectionString as Uri;
+
     if (uri.scheme != 'mysql') {
       throw new ArgumentError.value(connectionString, 'connectionString',
           'Invalid scheme in uri: ${uri.scheme}');
