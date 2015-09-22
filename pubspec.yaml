@@ -1,9 +1,9 @@
 name: dart_orm_adapter_mysql
-version: 0.0.9-dev
+version: 0.0.9
 description: >
   MySQL adapter for DartORM
 author: Ustimenko Sergey <ustims@gmail.com>
-homepage: http://github.com/ustims/DartORM-MySQL
+homepage: https://github.com/ustims/DartORM-MySQL
 environment:
   sdk: '>=1.9.0 <2.0.0'
 dependencies:
