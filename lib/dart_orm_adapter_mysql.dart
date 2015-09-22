@@ -105,56 +105,53 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
     return result;
   }
 
-  Future<List<Map>> select(Select select) {
-    Completer completer = new Completer();
+  Future<List<Map>> select(Select select) async {
     log.finest('Select:');
 
     String sqlQueryString = this.constructSelectSql(select);
     log.finest(sqlQueryString);
 
-    List<Map> results = new List<Map>();
 
-    this.connection.query(sqlQueryString).then((rawResults) {
-      return rawResults.forEach((rawRow) {
+    try {
+      var rawResults = await this.connection.query(sqlQueryString);
+
+      List<Map> results = new List<Map>();
+      for (var rawRow in rawResults) {
         Map<String, dynamic> row = new Map<String, dynamic>();
 
         int fieldNumber = 0;
         for (Field f in select.table.fields) {
-          if (rawRow[fieldNumber] is mysql_connector.Blob) {
-            row[f.fieldName] = rawRow[fieldNumber].toString();
+          var rawField = rawRow[fieldNumber];
+          if (rawField is mysql_connector.Blob) {
+            row[f.fieldName] = rawField.toString();
           } else {
-            row[f.fieldName] = rawRow[fieldNumber];
+            row[f.fieldName] = rawField;
           }
 
           fieldNumber++;
         }
 
         results.add(row);
-      });
-    }).then((r) {
+      }
+
       log.finest('Result:');
       log.finest(results);
-      completer.complete(results);
-    }).catchError((e) {
-      log.severe(e);
-      if (e is mysql_connector.MySqlException) {
-        switch (e.errorNumber) {
-          case 1146:
-            completer.completeError(new TableNotExistException());
-            break;
-          case 1072:
-            completer.completeError(new ColumnNotExistException());
-            break;
-          default:
-            completer.completeError(new UnknownAdapterException(e));
-            break;
-        }
-      } else {
-        completer.completeError(e);
-      }
-    });
 
-    return completer.future;
+      return results;
+    } on mysql_connector.MySqlException catch (e, stack) {
+      log.severe('MySqlException', e, stack);
+      switch (e.errorNumber) {
+        case 1146:
+          throw new TableNotExistException();
+        case 1072:
+          throw new ColumnNotExistException();
+        default:
+          throw new UnknownAdapterException(e);
+      }
+    } catch (e, stack) {
+      log.severe('Exception', e, stack);
+      rethrow;
+    }
   }
 
   Future<int> insert(Insert insert) async {
