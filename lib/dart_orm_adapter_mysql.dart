@@ -71,7 +71,7 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
 
     String databaseName = '';
 
-    if (!uri.pathSegments.isNotEmpty) {
+    if (uri.pathSegments.isNotEmpty) {
       if (uri.pathSegments.length > 1) {
         throw new ArgumentError.value(
             connectionString,
