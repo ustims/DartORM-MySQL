@@ -1,3 +1,7 @@
+## 0.1.1
+
+- Support the latest release of `dart_orm`
+
 ## 0.1.0
 
 - Added a new constructor `MySQLDBAdapter.withDetails`.
