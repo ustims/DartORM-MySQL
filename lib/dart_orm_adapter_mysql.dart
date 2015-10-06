@@ -120,6 +120,10 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
     }
   }
 
+  Future close() {
+    this.connection.close();
+  }
+
   Future createTable(Table table) async {
     String sqlQueryString = this.constructTableSql(table);
     log.finest('Create table:');

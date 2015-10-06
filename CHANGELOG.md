@@ -1,3 +1,7 @@
+## 0.1.2
+
+- Added close() method.
+
 ## 0.1.1
 
 - Support the latest release of `dart_orm`
