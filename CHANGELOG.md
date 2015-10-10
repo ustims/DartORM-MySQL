@@ -1,3 +1,7 @@
+## 0.1.3
+
+- delete() implemented
+
 ## 0.1.2
 
 - Added close() method.

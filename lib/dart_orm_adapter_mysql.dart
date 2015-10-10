@@ -215,9 +215,23 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
 
     var prepared = await connection.prepare(sqlQueryString);
     var result = await prepared.execute();
-    log.finest(result);
+    int affectedRows = result.affectedRows;
+    log.finest('Affected rows: $affectedRows');
 
-    return result.affectedRows;
+    return affectedRows;
+  }
+
+  Future delete(Delete delete) async {
+    log.finest('Delete:');
+    String sqlQueryString = this.constructDeleteSql(delete);
+    log.finest(sqlQueryString);
+
+    var prepared = await connection.prepare(sqlQueryString);
+    var result = await prepared.execute();
+    int affectedRows = result.affectedRows;
+    log.finest('Affected rows: $affectedRows');
+
+    return affectedRows;
   }
 
   /**
