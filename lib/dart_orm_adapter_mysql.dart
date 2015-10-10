@@ -120,8 +120,10 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
     }
   }
 
-  Future close() {
-    this.connection.close();
+  /// Closes all connections to the database.
+  void close() {
+    this.connection.closeConnectionsWhenNotInUse();
+    log.finest('Connection closed.');
   }
 
   Future createTable(Table table) async {

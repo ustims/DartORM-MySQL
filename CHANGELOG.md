@@ -1,6 +1,7 @@
 ## 0.1.2
 
 - Added close() method.
+- sqljocky version constraint raised to ^0.12.0 which supports ConnectionPool.closeConnectionsWhenNotInUse
 
 ## 0.1.1
 
