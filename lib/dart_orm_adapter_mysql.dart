@@ -157,11 +157,18 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
           var rawField = rawRow[fieldNumber];
           if (rawField is mysql_connector.Blob) {
             row[f.fieldName] = rawField.toString();
+          } else if (f.propertyTypeName == "bool") {
+            // mysql converts all bools to ints, so this is a workaround
+            row[f.fieldName] = rawField == 0 ? false : true;
           } else {
             row[f.fieldName] = rawField;
           }
 
           fieldNumber++;
+
+          if (fieldNumber > rawRow.length - 1) {
+            break;
+          }
         }
 
         results.add(row);
