@@ -5,7 +5,7 @@ import 'package:dart_orm/dart_orm.dart';
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:sqljocky/sqljocky.dart' as mysql_connector;
+import 'package:sqljocky5/sqljocky.dart' as mysql_connector;
 import 'package:logging/logging.dart';
 import 'package:pub_semver/pub_semver.dart';
 
@@ -228,7 +228,7 @@ class MySQLDBAdapter extends SQLAdapter with DBAdapter {
     return affectedRows;
   }
 
-  Future delete(Delete delete) async {
+  Future<int> delete(Delete delete) async {
     log.finest('Delete:');
     String sqlQueryString = this.constructDeleteSql(delete);
     log.finest(sqlQueryString);
